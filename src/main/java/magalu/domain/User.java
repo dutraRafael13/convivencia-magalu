@@ -1,5 +1,6 @@
 package magalu.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
@@ -8,13 +9,13 @@ public class User {
     private String name;
     private List<Order> orders;
 
-    public User(Integer id, String name, List<Order> orders) {
-        this.id = id;
-        this.name = name;
-        this.orders = orders;
+    public User() {
+        this.id = 0;
+        this.name = "";
+        this.orders = new ArrayList<>();
     }
 
-    public Integer getId() {
+        public Integer getId() {
         return id;
     }
 
