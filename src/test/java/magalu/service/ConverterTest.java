@@ -79,13 +79,14 @@ public class ConverterTest {
     @Test
     public void verifyTotalTwoUsers() {
         Map<Integer, User> mapUsers = new HashMap<>();
-        List<Order> orders = this.getOrders(1,1,1.0);
-        orders.get(0).getProducts().add(new Product(2,2.0));
-        mapUsers.put(1, new User(1, "Rafael", orders));
-        orders.get(0).getProducts().add(new Product(3,3.0));
-        mapUsers.put(1, new User(2, "João", orders));
+        List<Order> order1 = this.getOrders(1,1,1.0);
+        order1.get(0).getProducts().add(new Product(2,2.0));
+        mapUsers.put(1, new User(1, "Rafael", order1));
+        List<Order> order2 = this.getOrders(1,3,3.0);
+        mapUsers.put(2, new User(2, "João", order2));
         mapUsers = new Converter().verifyTotal(mapUsers);
         Assert.assertEquals(Double.valueOf(3.0), mapUsers.get(1).getOrders().get(0).getTotal());
+        Assert.assertEquals(Double.valueOf(3.0), mapUsers.get(2).getOrders().get(0).getTotal());
     }
 
     private List<Order> getOrders(Integer orderId, Integer productId, Double value) {
