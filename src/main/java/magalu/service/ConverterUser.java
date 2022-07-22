@@ -10,52 +10,42 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Converter {
+public class ConverterUser {
 
-    public Map<Integer, User> convert(String arquivo) {
+    protected Map<Integer, User> convert(String arquivo) {
         Map<Integer, User> mapUsers = new HashMap<>();
-        try {
-            Pattern pattern = Pattern.compile("^(\\d{10})(.{45})(\\d{10})(\\d{10})(.{12})(\\d{8})");
-            Path path = Paths.get(arquivo);
-            try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    Matcher matcher = pattern.matcher(line);
-                    if(matcher.find()){
-                        int i = 1;
-                        User user = new User();
-                        user.setId(Integer.valueOf(matcher.group(i++)));
-                        user.setName(matcher.group(i++).trim());
-                        Integer orderId = Integer.valueOf(matcher.group(i++));
-                        Integer productId = Integer.valueOf(matcher.group(i++));
-                        Double value = Double.valueOf(matcher.group(i++));
-                        LocalDate date = this.getDate(matcher.group(i));
-                        user.setOrders(getOrders(mapUsers.get(user.getId()) != null ?
-                                mapUsers.get(user.getId()).getOrders() : new ArrayList<>(), orderId, productId, value, date));
-                        mapUsers = this.getUsers(mapUsers, user);
-                    }
+        Pattern pattern = Pattern.compile("^(\\d{10})(.{45})(\\d{10})(\\d{10})(.{12})(\\d{8})");
+        Path path = Paths.get(arquivo);
+        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Matcher matcher = pattern.matcher(line);
+                if (matcher.find()) {
+                    int i = 1;
+                    User user = new User();
+                    user.setId(Integer.valueOf(matcher.group(i++)));
+                    user.setName(matcher.group(i++).trim());
+                    Integer orderId = Integer.valueOf(matcher.group(i++));
+                    Integer productId = Integer.valueOf(matcher.group(i++));
+                    Double value = Double.valueOf(matcher.group(i++));
+                    String date = matcher.group(i);
+                    user.setOrders(getOrders(mapUsers.get(user.getId()) != null ?
+                            mapUsers.get(user.getId()).getOrders() : new ArrayList<>(), orderId, productId, value, date));
+                    mapUsers = this.getUsers(mapUsers, user);
                 }
-                mapUsers = this.verifyTotal(mapUsers);
             }
+            mapUsers = this.verifyTotal(mapUsers);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return mapUsers;
     }
 
-    protected LocalDate getDate(String date) {
-        int year = Integer.parseInt(date.substring(0, 4));
-        int month = Integer.parseInt(date.substring(4, 6));
-        int day = Integer.parseInt(date.substring(6,8));
-        return LocalDate.of(year, month, day);
-    }
-
-    protected List<Order> getOrders(List<Order> orders, Integer orderId, Integer productId, Double value, LocalDate date) {
+    protected List<Order> getOrders(List<Order> orders, Integer orderId, Integer productId, Double value, String date) {
         if (!orders.isEmpty() && Boolean.TRUE.equals(verifyOrders(orders, orderId))) {
             orders.forEach(order -> {
                 if (Objects.equals(order.getId(), orderId)) {
