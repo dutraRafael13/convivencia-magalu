@@ -71,7 +71,7 @@ public class Converter {
         return orders;
     }
 
-    protected Boolean verifyOrders(List<Order> orders, Integer orderId) {
+    private Boolean verifyOrders(List<Order> orders, Integer orderId) {
         for (Order order : orders) {
             if (Objects.equals(order.getId(), orderId)) {
                 return true;
