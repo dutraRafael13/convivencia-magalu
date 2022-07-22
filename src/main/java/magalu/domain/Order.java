@@ -10,8 +10,9 @@ public class Order {
     private LocalDate date;
     List<Product> products;
 
-    public Order(Integer id, LocalDate date, List<Product> products) {
+    public Order(Integer id, Double total, LocalDate date, List<Product> products) {
         this.id = id;
+        this.total = total;
         this.date = date;
         this.products = products;
     }

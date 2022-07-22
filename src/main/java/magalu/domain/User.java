@@ -15,7 +15,13 @@ public class User {
         this.orders = new ArrayList<>();
     }
 
-        public Integer getId() {
+    public User(Integer id, String name, List<Order> orders) {
+        this.id = id;
+        this.name = name;
+        this.orders = orders;
+    }
+
+    public Integer getId() {
         return id;
     }
 

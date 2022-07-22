@@ -20,25 +20,27 @@ public class Converter {
     public Map<Integer, User> convert(String arquivo) {
         Map<Integer, User> mapUsers = new HashMap<>();
         try {
-            Pattern pattern = Pattern.compile("^(\\d{10})(.{45})(\\d{10})(\\d{10})(\\d{12})(\\d{8})");
+            Pattern pattern = Pattern.compile("^(\\d{10})(.{45})(\\d{10})(\\d{10})(.{12})(\\d{8})");
             Path path = Paths.get(arquivo);
             try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     Matcher matcher = pattern.matcher(line);
                     if(matcher.find()){
-                        int i = 0;
+                        int i = 1;
                         User user = new User();
                         user.setId(Integer.valueOf(matcher.group(i++)));
                         user.setName(matcher.group(i++).trim());
                         Integer orderId = Integer.valueOf(matcher.group(i++));
                         Integer productId = Integer.valueOf(matcher.group(i++));
                         Double value = Double.valueOf(matcher.group(i++));
-                        LocalDate date = LocalDate.parse(matcher.group(i));
-                        user.setOrders(getOrders(user.getOrders(), orderId, productId, value, date));
-                        this.getUsers(mapUsers, user);
+                        LocalDate date = this.getDate(matcher.group(i));
+                        user.setOrders(getOrders(mapUsers.get(user.getId()) != null ?
+                                mapUsers.get(user.getId()).getOrders() : new ArrayList<>(), orderId, productId, value, date));
+                        mapUsers = this.getUsers(mapUsers, user);
                     }
                 }
+                mapUsers = this.verifyTotal(mapUsers);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -46,24 +48,30 @@ public class Converter {
         return mapUsers;
     }
 
-    private List<Order> getOrders(List<Order> orders, Integer orderId, Integer productId, Double value, LocalDate date) {
-        List<Order> newOrders = new ArrayList<>();
-        if (orders != null && !orders.isEmpty() && verifyOrders(orders, orderId)) {
+    protected LocalDate getDate(String date) {
+        int year = Integer.parseInt(date.substring(0, 4));
+        int month = Integer.parseInt(date.substring(4, 6));
+        int day = Integer.parseInt(date.substring(6,8));
+        return LocalDate.of(year, month, day);
+    }
+
+    protected List<Order> getOrders(List<Order> orders, Integer orderId, Integer productId, Double value, LocalDate date) {
+        if (!orders.isEmpty() && Boolean.TRUE.equals(verifyOrders(orders, orderId))) {
             orders.forEach(order -> {
                 if (Objects.equals(order.getId(), orderId)) {
                     order.getProducts().add(new Product(productId, value));
+                    return;
                 }
             });
-            newOrders = orders;
         } else {
             List<Product> products = new ArrayList<>();
             products.add(new Product(productId, value));
-            newOrders.add(new Order(orderId, date, products));
+            orders.add(new Order(orderId, 0.0, date, products));
         }
-        return newOrders;
+        return orders;
     }
 
-    private Boolean verifyOrders(List<Order> orders, Integer orderId) {
+    protected Boolean verifyOrders(List<Order> orders, Integer orderId) {
         for (Order order : orders) {
             if (Objects.equals(order.getId(), orderId)) {
                 return true;
@@ -72,12 +80,21 @@ public class Converter {
         return false;
     }
 
-    private void getUsers(Map<Integer, User> mapUsers, User user) {
+    protected Map<Integer, User> getUsers(Map<Integer, User> mapUsers, User user) {
         if (mapUsers.containsKey(user.getId())) {
             mapUsers.replace(user.getId(), user);
         } else {
             mapUsers.put(user.getId(), user);
         }
+        return mapUsers;
+    }
+
+    protected Map<Integer, User> verifyTotal(Map<Integer, User> mapUsers) {
+        for (User user : mapUsers.values()) {
+            user.getOrders().forEach(order -> order.getProducts().forEach(product -> order.setTotal(order.getTotal() + product.getValue())));
+            mapUsers.replace(user.getId(), user);
+        }
+        return mapUsers;
     }
 
 }
