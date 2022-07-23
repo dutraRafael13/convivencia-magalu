@@ -32,8 +32,8 @@ public class ConverterJsonTest {
     public void convertTest() {
         ConverterJson convert = new ConverterJson(converterUser);
         Mockito.when(converterUser.convert("")).thenReturn(this.getUsers());
-        convert.convert("", "/home/rafael/user.json");
-        File file = new File("/home/rafael/user.json");
+        convert.convert("", "src/test/resources/user.json");
+        File file = new File("src/test/resources/user.json");
         Assert.assertTrue(file.exists());
     }
 
