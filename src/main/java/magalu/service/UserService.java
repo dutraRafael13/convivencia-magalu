@@ -1,5 +1,6 @@
 package magalu.service;
 
+import lombok.NonNull;
 import magalu.domain.Order;
 import magalu.domain.Product;
 import magalu.domain.User;
@@ -14,11 +15,13 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ConverterUser {
+public class UserService {
 
-    protected Map<Integer, User> convert(String arquivo) {
+    private static final String REGEX = "^(\\d{10})(.{45})(\\d{10})(\\d{10})(.{12})(\\d{8})";
+
+    public Map<Integer, User> convert(@NonNull final String arquivo) {
         Map<Integer, User> mapUsers = new HashMap<>();
-        Pattern pattern = Pattern.compile("^(\\d{10})(.{45})(\\d{10})(\\d{10})(.{12})(\\d{8})");
+        Pattern pattern = Pattern.compile(REGEX);
         Path path = Paths.get(arquivo);
         try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
             String line;
@@ -29,23 +32,23 @@ public class ConverterUser {
                     User user = new User();
                     user.setId(Integer.valueOf(matcher.group(i++)));
                     user.setName(matcher.group(i++).trim());
-                    Integer orderId = Integer.valueOf(matcher.group(i++));
-                    Integer productId = Integer.valueOf(matcher.group(i++));
-                    Double value = Double.valueOf(matcher.group(i++));
-                    String date = matcher.group(i);
+                    final var orderId = Integer.valueOf(matcher.group(i++));
+                    final var productId = Integer.valueOf(matcher.group(i++));
+                    final var value = Double.valueOf(matcher.group(i++));
+                    final var date = matcher.group(i);
                     user.setOrders(getOrders(mapUsers.get(user.getId()) != null ?
                             mapUsers.get(user.getId()).getOrders() : new ArrayList<>(), orderId, productId, value, date));
                     mapUsers = this.getUsers(mapUsers, user);
                 }
             }
-            mapUsers = this.verifyTotal(mapUsers);
+            mapUsers.values().forEach(user -> user.calculateTotal());
         } catch (IOException e) {
             e.printStackTrace();
         }
         return mapUsers;
     }
 
-    protected List<Order> getOrders(List<Order> orders, Integer orderId, Integer productId, Double value, String date) {
+    private List<Order> getOrders(List<Order> orders, Integer orderId, Integer productId, Double value, String date) {
         if (!orders.isEmpty() && Boolean.TRUE.equals(verifyOrders(orders, orderId))) {
             orders.forEach(order -> {
                 if (Objects.equals(order.getId(), orderId)) {
@@ -62,27 +65,14 @@ public class ConverterUser {
     }
 
     private Boolean verifyOrders(List<Order> orders, Integer orderId) {
-        for (Order order : orders) {
-            if (Objects.equals(order.getId(), orderId)) {
-                return true;
-            }
-        }
-        return false;
+        return orders.stream().anyMatch(order -> Objects.equals(order.getId(), orderId));
     }
 
-    protected Map<Integer, User> getUsers(Map<Integer, User> mapUsers, User user) {
+    private Map<Integer, User> getUsers(Map<Integer, User> mapUsers, User user) {
         if (mapUsers.containsKey(user.getId())) {
             mapUsers.replace(user.getId(), user);
         } else {
             mapUsers.put(user.getId(), user);
-        }
-        return mapUsers;
-    }
-
-    protected Map<Integer, User> verifyTotal(Map<Integer, User> mapUsers) {
-        for (User user : mapUsers.values()) {
-            user.getOrders().forEach(order -> order.getProducts().forEach(product -> order.setTotal(order.getTotal() + product.getValue())));
-            mapUsers.replace(user.getId(), user);
         }
         return mapUsers;
     }

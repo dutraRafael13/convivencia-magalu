@@ -15,4 +15,8 @@ public class User {
     private String name;
     private List<Order> orders;
 
+    public void calculateTotal() {
+        this.orders.forEach(order -> order.verifyTotal());
+    }
+
 }

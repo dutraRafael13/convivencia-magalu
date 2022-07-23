@@ -1,12 +1,12 @@
 package magalu;
 
-import magalu.service.ConverterJson;
-import magalu.service.ConverterUser;
+import magalu.converter.JsonConverter;
+import magalu.service.UserService;
 
 public class ConvivenciaMagalu {
 
     public static void main(String[] args) {
-        ConverterJson convert = new ConverterJson(new ConverterUser());
+        JsonConverter convert = new JsonConverter(new UserService());
         convert.convert("src/main/resources/data_1.txt", "src/main/resources/user1.json");
         convert.convert("src/main/resources/data_2.txt", "src/main/resources/user2.json");
     }

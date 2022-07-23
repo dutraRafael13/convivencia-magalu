@@ -1,8 +1,10 @@
-package magalu.service;
+package magalu.converter;
 
+import magalu.converter.JsonConverter;
 import magalu.domain.Order;
 import magalu.domain.Product;
 import magalu.domain.User;
+import magalu.service.UserService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,19 +21,20 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ConverterJsonTest {
+public class JsonConverterTest {
 
     @Mock
-    private ConverterUser converterUser;
+    private UserService service;
 
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
     }
+
     @Test
     public void convertTest() {
-        ConverterJson convert = new ConverterJson(converterUser);
-        Mockito.when(converterUser.convert("")).thenReturn(this.getUsers());
+        JsonConverter convert = new JsonConverter(service);
+        Mockito.when(service.convert("")).thenReturn(this.getUsers());
         convert.convert("", "src/test/resources/user.json");
         File file = new File("src/test/resources/user.json");
         Assert.assertTrue(file.exists());
