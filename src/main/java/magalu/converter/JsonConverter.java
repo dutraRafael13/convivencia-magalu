@@ -30,7 +30,7 @@ public class JsonConverter {
         }
     }
 
-    protected List<User> getUsers(String arquivo) {
+    protected List<User> getUsers(final String arquivo) {
         Map<Integer, User> mapUser = this.service.convert(arquivo);
         return new ArrayList<>(mapUser.values());
     }

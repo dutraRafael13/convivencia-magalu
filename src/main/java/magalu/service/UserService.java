@@ -41,14 +41,14 @@ public class UserService {
                     mapUsers = this.getUsers(mapUsers, user);
                 }
             }
-            mapUsers.values().forEach(user -> user.calculateTotal());
+            mapUsers.values().forEach(User::calculateTotal);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return mapUsers;
     }
 
-    private List<Order> getOrders(List<Order> orders, Integer orderId, Integer productId, Double value, String date) {
+    private List<Order> getOrders(final List<Order> orders, final Integer orderId, final Integer productId, final Double value, final String date) {
         if (!orders.isEmpty() && Boolean.TRUE.equals(verifyOrders(orders, orderId))) {
             orders.forEach(order -> {
                 if (Objects.equals(order.getId(), orderId)) {
@@ -64,11 +64,11 @@ public class UserService {
         return orders;
     }
 
-    private Boolean verifyOrders(List<Order> orders, Integer orderId) {
+    private Boolean verifyOrders(final List<Order> orders, final Integer orderId) {
         return orders.stream().anyMatch(order -> Objects.equals(order.getId(), orderId));
     }
 
-    private Map<Integer, User> getUsers(Map<Integer, User> mapUsers, User user) {
+    private Map<Integer, User> getUsers(final Map<Integer, User> mapUsers, final User user) {
         if (mapUsers.containsKey(user.getId())) {
             mapUsers.replace(user.getId(), user);
         } else {
