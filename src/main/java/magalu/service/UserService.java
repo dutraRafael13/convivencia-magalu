@@ -19,10 +19,10 @@ public class UserService {
 
     private static final String REGEX = "^(\\d{10})(.{45})(\\d{10})(\\d{10})(.{12})(\\d{8})";
 
-    public Map<Integer, User> convert(@NonNull final String arquivo) {
+    public Map<Integer, User> convert(@NonNull final String file) {
         Map<Integer, User> mapUsers = new HashMap<>();
         Pattern pattern = Pattern.compile(REGEX);
-        Path path = Paths.get(arquivo);
+        Path path = Paths.get(file);
         try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
             String line;
             while ((line = reader.readLine()) != null) {
